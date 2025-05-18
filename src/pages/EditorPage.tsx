@@ -3,7 +3,8 @@ import SideBar from "../components/Sidebar";
 import diff_match_patch from "diff-match-patch";
 import MdEditor from "@uiw/react-md-editor";
 import MarkdownIt from "markdown-it";
-
+import { Stage, Layer, Image as KonvaImage, Rect } from "react-konva";
+import previewImg from "../assets/preview.png";
 const EditorPage = () => {
   // const socket = new WebSocket("ws://localhost:8081/ws/edit");
   const [content, setContent] = useState<string>("");
@@ -16,8 +17,14 @@ const EditorPage = () => {
   let prevText = "";
 
   useEffect(() => {
-    console.log(content);
-  }, [content]);
+    const img = new window.Image();
+    img.src = previewImg;
+    img.onload = () => {
+      setImage(img);
+    };
+  }, []);
+
+  const [image, setImage] = useState<HTMLImageElement | null>(null);
   // WebSocket 연결 상태 표시
   // socket.addEventListener("open", () => {
   //   setStatus("🟢 WebSocket 연결 완료");
@@ -55,6 +62,7 @@ const EditorPage = () => {
 
   // 🔁 사용자 입력 → diff 계산 후 insert/delete 전송
   let debounceTimer: number;
+  const isSelected = true;
   const onEditorChange = (newContent?: string) => {
     if (newContent === undefined) {
       return;
@@ -104,21 +112,43 @@ const EditorPage = () => {
     }, 500);
   };
   return (
-    <>
-      {/* <SideBar /> */}
-      <MdEditor
-        style={{ height: "500px" }}
-        previewOptions={{
-          components: {
-            // 커스터마이징 옵션
-          },
-          // 커스텀 렌더링 함수 적용은 안됨 (대신 react-markdown 방식 사용 가능)
-        }}
-        preview="edit"
-        onChange={onEditorChange}
-        value={content}
-      />
-    </>
+    <div className="flex">
+      <SideBar />
+      <div className="flex flex-1">
+        <div className="flex-1 p-10">
+          <Stage width={580} height={835}>
+            <Layer>
+              {image && <KonvaImage image={image} />}
+              {isSelected && (
+                <Rect
+                  x={100}
+                  y={60}
+                  width={120}
+                  height={10}
+                  fill="yellow"
+                  opacity={0.4}
+                  cornerRadius={4}
+                />
+              )}
+            </Layer>
+          </Stage>
+        </div>
+        <div className="flex-1  p-10 cursor-text">
+          <MdEditor
+            style={{ height: "500px" }}
+            previewOptions={{
+              components: {
+                // 커스터마이징 옵션
+              },
+              // 커스텀 렌더링 함수 적용은 안됨 (대신 react-markdown 방식 사용 가능)
+            }}
+            preview="edit"
+            onChange={onEditorChange}
+            value={content}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 export default EditorPage;

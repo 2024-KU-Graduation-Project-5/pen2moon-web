@@ -7,6 +7,7 @@ import RecentPage from "./pages/RecentPage";
 import Login from "./components/Login";
 import HomePage from "./pages/HomePage";
 import EditorPage from "./pages/EditorPage";
+import EditorPage2 from "./pages/Editor2";
 
 function App() {
   // const [count, setCount] = useState(0);
@@ -21,6 +22,7 @@ function App() {
           <Route path="/recent" element={<RecentPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/edit" element={<EditorPage />} />
+          <Route path="/edit2" element={<EditorPage2 />} />
         </Routes>
       </BrowserRouter>
     </>
