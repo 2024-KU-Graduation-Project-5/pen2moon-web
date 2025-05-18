@@ -1,44 +1,30 @@
 import { useState } from "react";
-import mainLogo from "./assets/logo.svg";
+
 import "./App.css";
+import LoginPage from "./pages/LoginPage";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import RecentPage from "./pages/RecentPage";
+import Login from "./components/Login";
+import HomePage from "./pages/HomePage";
+import EditorPage from "./pages/EditorPage";
+import EditorPage2 from "./pages/Editor2";
 
 function App() {
   // const [count, setCount] = useState(0);
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center">
-        <img src={mainLogo}></img>
-        <div className="flex flex-col max-w-lg bg-red items-center">
-          <input className="grow" type="text"></input>
-          <input className="grow" type="text"></input>
-          <button>ddfaf</button>
-          <div>
-            <div>회원가입</div>
-          </div>
-        </div>
-      </div>
-      {/* <h1 className="text-3xl font-bold underline">Hello world!</h1>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p> */}
+      {/* TODO : AUTH관리 */}
+      <Login />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/recent" element={<RecentPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/edit" element={<EditorPage />} />
+          <Route path="/edit2" element={<EditorPage2 />} />
+        </Routes>
+      </BrowserRouter>
     </>
   );
 }
