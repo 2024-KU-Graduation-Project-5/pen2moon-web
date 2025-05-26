@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Login from "../components/Login";
+
 import RecentFile from "../components/RecentFile";
 import SideBar from "../components/Sidebar";
 import { MyDocument, getMyDocuments } from "../apis/ocr";

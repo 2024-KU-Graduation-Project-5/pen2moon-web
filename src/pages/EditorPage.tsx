@@ -7,6 +7,8 @@ import { Stage, Layer, Image as KonvaImage, Rect } from "react-konva";
 import previewImg from "../assets/preview.png";
 import { MyDocument, getMyDocument, getMyDocuments } from "../apis/ocr";
 import { useParams } from "react-router-dom";
+import pageMock from "../assets/page.png";
+
 const EditorPage = () => {
   const [content, setContent] = useState<string>("");
   const [status, setStatus] = useState<string>("");
@@ -15,6 +17,7 @@ const EditorPage = () => {
 
   const [docs, setDocs] = useState<MyDocument[]>();
   const [sock, setSock] = useState<WebSocket | null>(null);
+
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:80/api/ws/edit");
     // WebSocket 연결 상태 표시
@@ -49,7 +52,7 @@ const EditorPage = () => {
 
   const mdParser = new MarkdownIt(/* Markdown-it options */);
   const dmp = new diff_match_patch();
-  const documentId = "1";
+  const documentId = 2;
   let prevText = "";
 
   const [image, setImage] = useState<HTMLImageElement | null>(null);
@@ -86,6 +89,7 @@ const EditorPage = () => {
       return;
     }
     setContent(newContent);
+
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       const currText = content;
@@ -131,9 +135,17 @@ const EditorPage = () => {
   };
   return (
     <div className="flex">
-      {/*TODO : props*/}
+      {/* 좌측 사이드바 */}
       <SideBar fileList={docs!} />
-      <div className="flex flex-1">
+
+      {/* 우측 상단 고정 요소 */}
+      <div className="fixed top-10 right-10 p-2 z-50">
+        <img src={pageMock} />
+      </div>
+      {/* 본문 컨텐츠 */}
+      <div className="flex flex-1 pt-16">
+        {" "}
+        {/* ← pt-12: 고정된 높이만큼 여백 추가 */}
         <div className="basis-0 flex-1 p-10">
           <Stage width={580} height={835}>
             <Layer>
@@ -146,30 +158,13 @@ const EditorPage = () => {
                   }}
                 />
               )}
-              {/* {isSelected && (
-                <Rect
-                  x={100}
-                  y={60}
-                  width={120}
-                  height={10}
-                  fill="yellow"
-                  opacity={0.4}
-                  cornerRadius={4}
-                />
-              )} */}
             </Layer>
           </Stage>
         </div>
-        <div className="basis-0 flex-1  p-10 cursor-text h-full">
+        <div className="basis-0 flex-1 p-10 cursor-text h-full">
           <MdEditor
             style={{ height: "100%" }}
             height={770}
-            previewOptions={{
-              components: {
-                // 커스터마이징 옵션
-              },
-              // 커스텀 렌더링 함수 적용은 안됨 (대신 react-markdown 방식 사용 가능)
-            }}
             preview="edit"
             onChange={onEditorChange}
             value={content}

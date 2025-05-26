@@ -14,8 +14,7 @@ function App() {
 
   return (
     <>
-      {/* TODO : AUTH관리 */}
-      <Login />
+      {/* TODO : AUTH관리 */}{" "}
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />

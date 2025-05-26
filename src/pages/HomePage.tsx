@@ -29,9 +29,9 @@ const HomePage = () => {
           const result = data.parsedPdfList[0].objectList
             .map((item) => item.content.text)
             .join(" ");
-
+          //TODO : 하드콛딩
+          window.location.href = `/edit/2`;
           setIsLoading(false);
-          // TODO : navigate to EDITOR
         });
         // console.log("업로드된 PDF 파일:", f);
         setIsLoading(true);
