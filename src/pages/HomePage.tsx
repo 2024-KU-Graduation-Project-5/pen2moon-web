@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import SideBar from "../components/Sidebar";
 import UploadFile from "../components/UploadFile";
 import Spinner from "../components/Spinner";
-import { MyDocument, getMyDocuments, getTestLogin, postOCR } from "../apis/ocr";
+import { MyDocument, getMyDocuments, postOCR } from "../apis/ocr";
 
 const HomePage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -24,13 +24,12 @@ const HomePage = () => {
         const f = target.files[0];
         // 여기에 파일을 처리하는 로직 추가
         postOCR(f).then((data) => {
-          // console.log(data);
           // PDF 하나만 올리죠 일단 TODO : 여러 개 올리기
           const result = data.parsedPdfList[0].objectList
             .map((item) => item.content.text)
             .join(" ");
-          //TODO : 하드콛딩
-          window.location.href = `/edit/2`;
+          //TODO : 하드코딩
+          window.location.href = `/edit/${data.documentId}`;
           setIsLoading(false);
         });
         // console.log("업로드된 PDF 파일:", f);
