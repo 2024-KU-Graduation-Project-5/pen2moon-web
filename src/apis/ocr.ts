@@ -1,6 +1,8 @@
 import { kyClient, multiKyClient } from "./kyClient";
 
 export interface postOCRResponse {
+  documentId: number;
+  totalPage: number;
   parsedPdfList: postOCRData[];
 }
 export interface postOCRData {
