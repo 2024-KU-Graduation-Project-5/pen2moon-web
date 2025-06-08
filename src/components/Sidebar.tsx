@@ -42,9 +42,11 @@ const SideBar = ({ fileList }: { fileList: MyDocument[] }) => {
           </div>
 
           {!collapsed && (
-            <div className="flex mt-12 pl-7 items-center">
-              <img className="mr-2" src={convertIcon} onClick={onLogoClick} />새
-              PDF 변환하기
+            <div
+              className="flex mt-12 pl-7 items-center cursor-pointer"
+              onClick={onLogoClick}
+            >
+              <img className="mr-2" src={convertIcon} />새 PDF 변환하기
             </div>
           )}
           {!collapsed && (

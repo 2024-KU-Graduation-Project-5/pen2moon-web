@@ -1,13 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SideBar from "../components/Sidebar";
 import diff_match_patch from "diff-match-patch";
 import MdEditor from "@uiw/react-md-editor";
 import MarkdownIt from "markdown-it";
-import { Stage, Layer, Image as KonvaImage, Rect } from "react-konva";
-import previewImg from "../assets/preview.png";
-import { MyDocument, getMyDocument, getMyDocuments } from "../apis/ocr";
+import { Stage, Layer, Image as KonvaImage } from "react-konva";
+
+import {
+  MyDocument,
+  getMyDocument,
+  getMyDocuments,
+  DocumentContent,
+} from "../apis/ocr";
 import { useParams } from "react-router-dom";
-import pageMock from "../assets/page.png";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const EditorPage = () => {
   const [content, setContent] = useState<string>("");
@@ -15,7 +20,10 @@ const EditorPage = () => {
   const [page, setPage] = useState<number>(1);
   const { id } = useParams();
 
+  const prevTextRef = useRef("");
+
   const [docs, setDocs] = useState<MyDocument[]>();
+  const [currentDoc, setCurrentDoc] = useState<DocumentContent[]>();
   const [sock, setSock] = useState<WebSocket | null>(null);
 
   useEffect(() => {
@@ -41,6 +49,7 @@ const EditorPage = () => {
       setDocs(res);
     });
     getMyDocument(Number(id)).then((res) => {
+      setCurrentDoc(res.documentContentList);
       setContent(res.documentContentList[page - 1].content);
       const img = new window.Image();
       img.src = res.documentContentList[page - 1].originalImageUrl;
@@ -49,41 +58,61 @@ const EditorPage = () => {
       };
     });
   }, []);
+  useEffect(() => {
+    if (currentDoc) {
+      setContent(currentDoc[page - 1].content);
+      const img = new window.Image();
+      img.src = currentDoc[page - 1].originalImageUrl;
+      img.onload = () => {
+        setImage(img);
+      };
+    }
+  }, [page]);
+  useEffect(() => {
+    if (sock !== null) {
+      // // 📥 서버에서 오는 메시지 처리 (resync 대응 추가)
+      sock.addEventListener("message", (event) => {
+        const msg = JSON.parse(event.data);
+
+        // 서버가 resync 요청한 경우
+        if (msg.type === "resync" && msg.documentId === documentId) {
+          const text = content;
+          const resyncMessage = {
+            documentId: documentId,
+            operation: "resync",
+            page: page,
+            start: 0,
+            end: text.length,
+            text: text,
+          };
+          if (sock.readyState === WebSocket.OPEN) {
+            sock.send(JSON.stringify(resyncMessage));
+            console.log("📤 [RESYNC] 전체 문서 전송:", resyncMessage);
+          }
+        }
+      });
+    }
+  }, [sock, content]);
 
   const mdParser = new MarkdownIt(/* Markdown-it options */);
   const dmp = new diff_match_patch();
-  const documentId = 2;
-  let prevText = "";
+  const documentId = Number(id);
 
   const [image, setImage] = useState<HTMLImageElement | null>(null);
-
-  if (sock !== null) {
-    // // 📥 서버에서 오는 메시지 처리 (resync 대응 추가)
-    sock.addEventListener("message", (event) => {
-      const msg = JSON.parse(event.data);
-
-      // 서버가 resync 요청한 경우
-      if (msg.type === "resync" && msg.documentId === documentId) {
-        const text = content;
-        const resyncMessage = {
-          documentId: documentId,
-          operation: "resync",
-          page: page,
-          start: 0,
-          end: text.length,
-          text: text,
-        };
-        if (sock.readyState === WebSocket.OPEN) {
-          sock.send(JSON.stringify(resyncMessage));
-          console.log("📤 [RESYNC] 전체 문서 전송:", resyncMessage);
-        }
-      }
-    });
-  }
 
   // 🔁 사용자 입력 → diff 계산 후 insert/delete 전송
   let debounceTimer: number;
   const isSelected = true;
+  const onPageLeftClick = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+  const onPageRightClick = () => {
+    if (currentDoc && page < currentDoc.length) {
+      setPage(page + 1);
+    }
+  };
   const onEditorChange = (newContent?: string) => {
     if (newContent === undefined) {
       return;
@@ -92,8 +121,8 @@ const EditorPage = () => {
 
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      const currText = content;
-      const diffs = dmp.diff_main(prevText, currText);
+      const currText = newContent;
+      const diffs = dmp.diff_main(prevTextRef.current, currText);
       dmp.diff_cleanupEfficiency(diffs);
 
       let index = 0;
@@ -124,13 +153,12 @@ const EditorPage = () => {
           };
           index += text.length;
         }
-        console.log(sock, message);
         if (sock !== null && message && sock.readyState === WebSocket.OPEN) {
           sock.send(JSON.stringify(message));
           console.log(`📤 [${message.operation.toUpperCase()}] 전송:`, message);
         }
       }
-      prevText = currText;
+      prevTextRef.current = currText;
     }, 500);
   };
   return (
@@ -140,7 +168,20 @@ const EditorPage = () => {
 
       {/* 우측 상단 고정 요소 */}
       <div className="fixed top-10 right-10 p-2 z-50">
-        <img src={pageMock} />
+        <div className="flex">
+          <div className="cursor-pointer" onClick={onPageLeftClick}>
+            <ChevronLeft />
+          </div>
+          <div>페이지</div>
+          <div className="flex ml-2 gap-1">
+            <div>{page}</div>
+            <div>/</div>
+            <div>{currentDoc?.length}</div>
+          </div>
+          <div className="cursor-pointer" onClick={onPageRightClick}>
+            <ChevronRight />
+          </div>
+        </div>
       </div>
       {/* 본문 컨텐츠 */}
       <div className="flex flex-1 pt-16">
