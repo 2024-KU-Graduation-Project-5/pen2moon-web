@@ -14,14 +14,12 @@ function App() {
 
   return (
     <>
-      {/* TODO : AUTH관리 */}
-      <Login />
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/recent" element={<RecentPage />} />
           <Route path="/" element={<HomePage />} />
-          <Route path="/edit" element={<EditorPage />} />
+          <Route path="/edit/:id" element={<EditorPage />} />
           <Route path="/edit2" element={<EditorPage2 />} />
         </Routes>
       </BrowserRouter>

@@ -4,10 +4,17 @@ import SmallFile from "./SmallFile";
 import dotsIcon from "../assets/dots.svg";
 import { CircleChevronLeft, CircleChevronRight } from "lucide-react";
 import { useState } from "react";
+import { MyDocument } from "../apis/ocr";
+import { useNavigate } from "react-router-dom";
 
-const SideBar = () => {
+const SideBar = ({ fileList }: { fileList: MyDocument[] }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const list = ["테스트 파일 1", "테스트 파일 2"];
+  const onDotsClick = () => {
+    window.location.href = "/recent";
+  };
+  const onLogoClick = () => {
+    window.location.href = "/";
+  };
   return (
     <>
       <div
@@ -27,12 +34,18 @@ const SideBar = () => {
             )}
           </button>
 
-          <div className={`pl-7 pt-7 ${collapsed ? "hidden" : ""}`}>
+          <div
+            className={`pl-7 pt-7 cursor-pointer ${collapsed ? "hidden" : ""}`}
+            onClick={onLogoClick}
+          >
             <img className="w-40" src={logo} />
           </div>
 
           {!collapsed && (
-            <div className="flex mt-12 pl-7 items-center">
+            <div
+              className="flex mt-12 pl-7 items-center cursor-pointer"
+              onClick={onLogoClick}
+            >
               <img className="mr-2" src={convertIcon} />새 PDF 변환하기
             </div>
           )}
@@ -40,11 +53,17 @@ const SideBar = () => {
             <div className="mt-6 text-gray-400 pl-7">
               <div className="flex items-center">
                 <div className="mb-1 mr-1">최근 작업내역</div>
-                <img className="ml-auto mr-4" src={dotsIcon} />
+
+                <img
+                  className="ml-auto mr-4 cursor-pointer"
+                  src={dotsIcon}
+                  onClick={onDotsClick}
+                />
               </div>
-              {list.map((value, index) => (
-                <SmallFile key={index} title={value} />
-              ))}
+              {fileList &&
+                fileList.map((value, index) => (
+                  <SmallFile key={value.id} title={value.title} id={value.id} />
+                ))}
             </div>
           )}
         </div>
